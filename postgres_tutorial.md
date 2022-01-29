@@ -48,13 +48,70 @@ echo "export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/14/bin/" >>
 ```
 
 
-### Connect Postgres
+#### Clear port
 
-There are two method to open the
+If the port you set for the Postgres server is in use you should expect to get the following message when trying to start the server:
+
+<img src="images/port_in_used.png" width="60%" align="center"/></a>
+
+This mean that the port is either used by other Postgres server or other application. To check what ports in use and by which applications you can use the `lsof` function on the terimnal:
+
+``` zsh
+sudo lsof -i :5432                                                                                           COMMAND  PID     USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+postgres 124 postgres    7u  IPv6 0xc250a5ea155736fb      0t0  TCP *:postgresql (LISTEN)
+postgres 124 postgres    8u  IPv4 0xc250a5ea164aa3b3      0t0  TCP *:postgresql (LISTEN)
+```
+
+Where the `i` argument enables to search by port number, in the example above by `5432`. As can see from the output, the port is used by other Posrgres server. You can clear the port by using the `pkill` command:
+
+``` zsh
+sudo pkill -u postgres
+```
+
+Where the `u` arugment enbales to define the port you want to clear by the USER field, in this case `postgres`.
+
+**Note:** Before you are clearing the port, make sure you do not need the applications on that port. 
+
+
+
+### SSH the database
+
+To open the database on the terminal you can either use the Postgres App or directly on the command line.
+
+#### SSH with the Postgres App
+ 
+The Postgres App enables you to SSH directly to the server via the terminal. On Mac, by default, the app will use the built-in terminal emlator. If you want to change terimnal default setting go to `Preferences...` and select the terminal emlator you want to use:
+
+<img src="images/set_terminal.png" width="60%" align="center"/></a>
+
+Once the Postgres server is up and working, clicking on any of the databases on the server will open the terminal and SSH into the server:
+
+
+
+### SSH from the terminal
+
+Alternatively, you can SSH directly from the terminal with the `psql` command:
+
+<img src="images/ssh_terminal.png" width="60%" align="center"/></a>
+
+By default, the `psql` commend will SSH to the database with the user name, in this case `ramikrispin`. You can use the `dbname` argument to specify the database name:
+
+``` zsh
+psql template1                                                 
+psql (14.1)
+Type "help" for help.
+
+template1=#
+```
+
+
+More options available on the `psql` command [documentation](https://www.postgresql.org/docs/9.2/app-psql.html).
+
 
 ### Sources
 * **Tutrial -** https://www.youtube.com/watch?v=qw--VYLpxG4&t=1073s&ab_channel=freeCodeCamp.org
 * **PostgreSQL -** https://en.wikipedia.org/wiki/PostgreSQL
+* **Documentation -** https://www.postgresql.org/docs/
 
 
 
