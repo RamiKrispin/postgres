@@ -48,6 +48,41 @@ echo "export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/14/bin/" >>
 ```
 
 
+#### Clear port
+
+If the port you set for the Postgres server is in use you should expect to get the following message when trying to start the server:
+
+<img src="images/port_in_used.png" width="60%" align="center"/></a>
+
+This mean that the port is either used by other Postgres server or other application. To check what ports in use and by which applications you can use the `lsof` function on the terimnal:
+
+``` zsh
+sudo lsof -i :5432                                                                                           COMMAND  PID     USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+postgres 124 postgres    7u  IPv6 0xc250a5ea155736fb      0t0  TCP *:postgresql (LISTEN)
+postgres 124 postgres    8u  IPv4 0xc250a5ea164aa3b3      0t0  TCP *:postgresql (LISTEN)
+```
+
+Where the `i` argument enables to search by port number, in the example above by `5432`. As can see from the output, the port is used by other Posrgres server. You can clear the port by using the `pkill` command:
+
+``` zsh
+sudo pkill -u postgres
+```
+
+Where the `u` arugment enbales to define the port you want to clear by the USER field, in this case `postgres`.
+
+**Note:** Before you are clearing the port, make sure you do not need the applications on that port. 
+
+
+
+### SSH the database
+
+To open the database on the terminal you can either use the Postgres App or directly on the command line.
+
+#### SSH with the Postgres App
+On the Posgres App open the
+
+
+
 ### Sources
 * **Tutrial -** https://www.youtube.com/watch?v=qw--VYLpxG4&t=1073s&ab_channel=freeCodeCamp.org
 * **PostgreSQL -** https://en.wikipedia.org/wiki/PostgreSQL
