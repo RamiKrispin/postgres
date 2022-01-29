@@ -48,6 +48,10 @@ echo "export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/14/bin/" >>
 ```
 
 
+### Connect Postgres
+
+There are two method to open the
+
 ### Sources
 * **Tutrial -** https://www.youtube.com/watch?v=qw--VYLpxG4&t=1073s&ab_channel=freeCodeCamp.org
 * **PostgreSQL -** https://en.wikipedia.org/wiki/PostgreSQL
