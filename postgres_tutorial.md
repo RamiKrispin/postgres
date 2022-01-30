@@ -105,7 +105,114 @@ template1=#
 ```
 
 
-More options available on the `psql` command [documentation](https://www.postgresql.org/docs/9.2/app-psql.html).
+More options available on the `psql` command [documentation](https://www.postgresql.org/docs/9.2/app-psql.html), or on the command line with `psql --help`.
+
+
+### Help and Documentations
+
+Like most common programming systems or lagnuages, Postgres has both help functionality and documentation. 
+
+You can access the core documentation on Postgres website under the [Documentation](https://www.postgresql.org/docs/) tab, where you can select Postgres manuals by version. The manuales available, in addition to English, in other languages such as Chinese, French, Japanese, and Russian.
+
+The `psql` is the command line function that enable you to SSH into the Postgres server. Like most common command lines, you can use the `help` argument to review the function arguments:
+
+``` zsh
+psql --help
+```
+
+Once connected to the Postgres command line interface, you use the `help` command to review the core main help functions:
+
+``` zsh
+ramikrispin=# help
+You are using psql, the command-line interface to PostgreSQL.
+Type:  \copyright for distribution terms
+       \h for help with SQL commands
+       \? for help with psql commands
+       \g or terminate with semicolon to execute query
+       \q to quit
+
+```
+
+
+### Working with Database
+
+As we saw before, by default, when using the `psql` function will login to the default database which would be under the user name, in my case `ramikrispin`. You can define aditional arguments such as the server name, ports or any other exsiting database. For example, let's re-log to `template1` database using the `psql` function:
+
+```zsh
+psql -h localhost -p 5432 -U ramikrispin template1                                                     
+psql (14.1)
+Type "help" for help.
+```
+
+Where, `h` define the host name, `p` the server port, and `U` the user name.
+
+Typically, the first thing you would like to check is the list of active database. The `\l` function returns a table with a list of active databases and some additional information such as database owner, encoding, access privileges:
+
+```zsh
+ramikrispin-# \l
+                                    List of databases
+    Name     |    Owner    | Encoding |   Collate   |    Ctype    |   Access privileges
+-------------+-------------+----------+-------------+-------------+-----------------------
+ postgres    | postgres    | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ ramikrispin | ramikrispin | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ template0   | postgres    | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+             |             |          |             |             | postgres=CTc/postgres
+ template1   | postgres    | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+             |             |          |             |             | postgres=CTc/postgres
+(4 rows)
+
+```
+
+You can use the `\c` function to change to another database, for example, let's login to `postgres` database:
+
+``` zsh
+template1=# \c postgres
+You are now connected to database "postgres" as user "ramikrispin".
+postgres=#
+```
+
+
+The `CREATE DATABASE`, as its name implies, enable you to create a new database:
+
+```zsh
+postgres=# CREATE DATABASE db1;
+CREATE DATABASE
+postgres=# \l
+                                    List of databases
+    Name     |    Owner    | Encoding |   Collate   |    Ctype    |   Access privileges
+-------------+-------------+----------+-------------+-------------+-----------------------
+ db1         | ramikrispin | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ postgres    | postgres    | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ ramikrispin | ramikrispin | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ template0   | postgres    | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+             |             |          |             |             | postgres=CTc/postgres
+ template1   | postgres    | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+             |             |          |             |             | postgres=CTc/postgres
+(5 rows)
+```
+**Note:** All the commends on inter ended up with `;`
+
+
+Similarly, you can use the `DROP DATABASE` to delete a database:
+
+```zsh
+ramikrispin=# DROP DATABASE db1;
+DROP DATABASE
+ramikrispin=# \l
+                                    List of databases
+    Name     |    Owner    | Encoding |   Collate   |    Ctype    |   Access privileges
+-------------+-------------+----------+-------------+-------------+-----------------------
+ postgres    | postgres    | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ ramikrispin | ramikrispin | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ template0   | postgres    | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+             |             |          |             |             | postgres=CTc/postgres
+ template1   | postgres    | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+             |             |          |             |             | postgres=CTc/postgres
+(4 rows)
+```
+
+
+
 
 
 ### Sources
