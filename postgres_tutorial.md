@@ -212,6 +212,143 @@ ramikrispin=# \l
 ```
 
 
+### Define Columns
+
+After you logged in an existing database or created a new one, the next step is to create a table with the `CREATE TABLE` function. The function define the table name and inside a bracket define the column names, attributes (integer, character, etc.), and constrians. For example, let's create a table for the `mtcars` dataset<sup>3</sup> :
+
+
+``` sql
+CREATE TABLE  mtcars (
+    model VARCHAR(20) NOT NULL PRIMARY KEY,
+    mpg FLOAT(2) NOT NULL,
+    cyc INT NOT NULL,
+    disp INT NOT NULL,
+    hp INT NOT NULL,
+    drat FLOAT(2) NOT NULL,
+    wt FLOAT(3) NOT NULL,
+    qsec FLOAT(2) NOT NULL,
+    vs INT NOT NULL,
+    am INT NOT NULL,
+    gear INT NOT NULL,
+    carb INT NOT NULL
+);
+```
+
+You should expect the following output as confermation that the table was created:
+```
+CREATE TABLE
+```
+
+Where, we set all the columns with the constrain of `NOT NULL` (e.g., cannot enter empty values) and the `model` column as the primary key of the table. The `d` command enables you the review what tables exist on the database:
+
+``` zsh
+ramikrispin=# \d
+           List of relations
+ Schema |  Name  | Type  |    Owner
+--------+--------+-------+-------------
+ public | mtcars | table | ramikrispin
+(1 row)
+
+```
+
+Using the `d+` command will return additional information, such as the table descriptions (if exists) and table size:
+
+```
+ramikrispin-# \d+
+                                       List of relations
+ Schema |  Name  | Type  |    Owner    | Persistence | Access method |    Size    | Description
+--------+--------+-------+-------------+-------------+---------------+------------+-------------
+ public | mtcars | table | ramikrispin | permanent   | heap          | 8192 bytes |
+(1 row)
+```
+
+**Note:** The `row` number on the table above refer to the number of items in the returned table as opposed to number of raws on the `mtcars` table (which at this point should be 0).
+
+
+You can use the `d` command to review the table columns and their attribues as defined above:
+
+``` zsh
+ramikrispin=# \d mtcars
+                      Table "public.mtcars"
+ Column |         Type          | Collation | Nullable | Default
+--------+-----------------------+-----------+----------+---------
+ model  | character varying(20) |           | not null |
+ mpg    | real                  |           | not null |
+ cyc    | integer               |           | not null |
+ disp   | integer               |           | not null |
+ hp     | integer               |           | not null |
+ drat   | real                  |           | not null |
+ wt     | real                  |           | not null |
+ qsec   | real                  |           | not null |
+ vs     | integer               |           | not null |
+ am     | integer               |           | not null |
+ gear   | integer               |           | not null |
+ carb   | integer               |           | not null |
+Indexes:
+    "mtcars_pkey" PRIMARY KEY, btree (model)
+```
+
+You can see on the table above, all the value on the `Nullable` colume showed the constrain we set above, and all the table fileds must have some value (or `not null`). 
+
+
+Last but not least, we can print the table by using basic SQL:
+
+``` SQL
+SELECT * FROM public.mtcars;
+```
+
+Which should return:
+```
+ model | mpg | cyc | disp | hp | drat | wt | qsec | vs | am | gear | carb
+-------+-----+-----+------+----+------+----+------+----+----+------+------
+(0 rows)
+```
+
+
+### Populate the Table
+
+After creating the table, the next step is to populate the table with records. The `INSERT INTO` command enables to add new rows (or records) to the table. For example, we will enter the first raw on the `mtcars` dataset for model `Mazda RX4`:
+
+``` 
+INSERT INTO mtcars(
+    model, mpg, cyc, disp, hp, drat, wt, qsec, vs, am, gear, carb
+)
+VALUES ('Mazda RX4', 21.0, 6, 160, 110, 3.90, 2.620, 16.46, 0, 1,4, 4);
+```
+
+This will retuern:
+
+```
+INSERT 0 1
+```
+
+Which confirmed that the row was added successfully. Let's query again the table and see the new row values:
+
+```
+ramikrispin=# SELECT * FROM public.mtcars;
+   model   | mpg | cyc | disp | hp  | drat |  wt  | qsec  | vs | am | gear | carb
+-----------+-----+-----+------+-----+------+------+-------+----+----+------+------
+ Mazda RX4 |  21 |   6 |  160 | 110 |  3.9 | 2.62 | 16.46 |  0 |  1 |    4 |    4
+(1 row)
+```
+
+**Note:** Postgres is sensative on the type of quotation mark for strings objects allowing only single quotation mark. This will work 'Mazda RX4', but this "Mazda RX4" will return a syntax error.
+
+What will happen when trying to enter undefined value? Let's now the second row of the `mtcars` dataset for `Mazda RX4 Wag` model, this time we will enter the `cyc` field as float instead of integer (i.e., `6.1` instead of `6`) and print the table again:
+
+``` 
+ramikrispin=# INSERT INTO mtcars(                                                                                                                                 model, mpg, cyc, disp, hp, drat, wt, qsec, vs, am, gear, carb                                                                                             )                                                                                                                                                             VALUES ('Mazda RX4 Wag', 21.0, 6.1, 160, 110, 3.90, 2.620, 16.46, 0, 1,4, 4);
+INSERT 0 1
+ramikrispin=# SELECT * FROM public.mtcars;
+     model     | mpg | cyc | disp | hp  | drat |  wt  | qsec  | vs | am | gear | carb
+---------------+-----+-----+------+-----+------+------+-------+----+----+------+------
+ Mazda RX4     |  21 |   6 |  160 | 110 |  3.9 | 2.62 | 16.46 |  0 |  1 |    4 |    4
+ Mazda RX4 Wag |  21 |   6 |  160 | 110 |  3.9 | 2.62 | 16.46 |  0 |  1 |    4 |    4
+(2 rows)
+```
+
+As you can see the value of the `cyc` was accepted, although we did not use the defined format - integer. It ignored the number decimal and treat it as integer. In other cases it might trigger error, for example, when trying to add string to numeric field (e.g., '6' won't trigger error, but '6a' does). This something to be aware of, as it reformat the input values without triggering any warnnings or error message. 
+
 
 
 
@@ -225,5 +362,7 @@ ramikrispin=# \l
 <sup>1</sup> https://www.freecodecamp.org/news/postgresql-full-course/
 
 <sup>2 </sup> Source [Postgres Wikipedia](https://en.wikipedia.org/wiki/PostgreSQL) page
+
+<sup>3</sup> The `mtcars` data was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models). This dataset can be found on the R `datasets` package.
 
 
