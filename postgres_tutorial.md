@@ -165,7 +165,7 @@ ramikrispin-# \l
 
 You can use the `\c` function to change to another database, for example, let's login to `postgres` database:
 
-``` zsh
+```
 template1=# \c postgres
 You are now connected to database "postgres" as user "ramikrispin".
 postgres=#
@@ -174,7 +174,7 @@ postgres=#
 
 The `CREATE DATABASE`, as its name implies, enable you to create a new database:
 
-```zsh
+```
 postgres=# CREATE DATABASE db1;
 CREATE DATABASE
 postgres=# \l
@@ -195,7 +195,7 @@ postgres=# \l
 
 Similarly, you can use the `DROP DATABASE` to delete a database:
 
-```zsh
+```
 ramikrispin=# DROP DATABASE db1;
 DROP DATABASE
 ramikrispin=# \l
@@ -222,7 +222,7 @@ CREATE TABLE  mtcars (
     model VARCHAR(20) NOT NULL PRIMARY KEY,
     mpg FLOAT(2) NOT NULL,
     cyc INT NOT NULL,
-    disp INT NOT NULL,
+    disp FLOAT(2) NOT NULL,
     hp INT NOT NULL,
     drat FLOAT(2) NOT NULL,
     wt FLOAT(3) NOT NULL,
@@ -241,7 +241,7 @@ CREATE TABLE
 
 Where, we set all the columns with the constrain of `NOT NULL` (e.g., cannot enter empty values) and the `model` column as the primary key of the table. The `d` command enables you the review what tables exist on the database:
 
-``` zsh
+```
 ramikrispin=# \d
            List of relations
  Schema |  Name  | Type  |    Owner
@@ -348,6 +348,117 @@ ramikrispin=# SELECT * FROM public.mtcars;
 ```
 
 As you can see the value of the `cyc` was accepted, although we did not use the defined format - integer. It ignored the number decimal and treat it as integer. In other cases it might trigger error, for example, when trying to add string to numeric field (e.g., '6' won't trigger error, but '6a' does). This something to be aware of, as it reformat the input values without triggering any warnnings or error message. 
+
+
+### Importing data from external sources
+In most cases, you won't populate or enter the table fields manually, as in the example above. This section will review different methods to import or load data from external sources.
+
+#### Loading table from CSV file
+One of the most common formats for flat files is CSV (or Comma Separated Values). In the following example, we will use the `COPY` command to load the **mtcars** dataset from a CSV file - `mtcars.csv`. The file is available in the `csv` folder. Before loading the file, let's use the `head` command on the terminal to review the data format:
+
+``` shell
+head csv/mtcars.csv                                                                            
+"model","mpg","cyl","disp","hp","drat","wt","qsec","vs","am","gear","carb"
+"Mazda RX4",21,6,160,110,3.9,2.62,16.46,0,1,4,4
+"Mazda RX4 Wag",21,6,160,110,3.9,2.875,17.02,0,1,4,4
+"Datsun 710",22.8,4,108,93,3.85,2.32,18.61,1,1,4,1
+"Hornet 4 Drive",21.4,6,258,110,3.08,3.215,19.44,1,0,3,1
+"Hornet Sportabout",18.7,8,360,175,3.15,3.44,17.02,0,0,3,2
+"Valiant",18.1,6,225,105,2.76,3.46,20.22,1,0,3,1
+"Duster 360",14.3,8,360,245,3.21,3.57,15.84,0,0,3,4
+"Merc 240D",24.4,4,146.7,62,3.69,3.19,20,1,0,4,2
+"Merc 230",22.8,4,140.8,95,3.92,3.15,22.9,1,0,4,2
+```
+
+As you can see, the values on the table are separated with `,` delimiter. Before loading the data from the file, we will have to create a table and declare the columns format. Let's reuse the command we used before to create the `mtcars` table, this time named it `mtcars_csv`:
+
+``` sql
+CREATE TABLE  mtcars_csv (
+  model VARCHAR(20) NOT NULL PRIMARY KEY,
+  mpg FLOAT(2) NOT NULL,
+  cyc INT NOT NULL,
+  disp FLOAT(2) NOT NULL,
+  hp INT NOT NULL,
+  drat FLOAT(2) NOT NULL,
+  wt FLOAT(3) NOT NULL,
+  qsec FLOAT(2) NOT NULL,
+  vs INT NOT NULL,
+  am INT NOT NULL,
+  gear INT NOT NULL,
+  carb INT NOT NULL
+);
+
+```
+
+The expected output - `CREATE TABLE` confirmed that the table was created successfully.
+
+```
+COPY mtcars_csv (
+  model, mpg, cyc, disp, hp, drat, wt, qsec, vs, am, gear, carb
+  )
+FROM 'YOUR_PATH/csv/mtcars.csv'
+DELIMITER ','
+CSV HEADER;
+
+```
+
+Where `COPY` defines the target table, and `FROM` the target CSV file. You can define the type of the delimiter with the `DELIMITER` argument. Last but not least, the `CSV HEADER` indicated that the first raw is the table header, and it can be skipped. If the data was loaded, successfully from the file, you should expect the following output:
+
+```
+COPY 32
+```
+
+Which indicated that 32 raws were loaded from the CSV file. We can use the `SELECT` command to confirm that the table was loaded properly:
+
+
+```
+ramikrispin=# SELECT * FROM mtcars_csv LIMIT 10;
+       model       | mpg  | cyc | disp  | hp  | drat |  wt   | qsec  | vs | am | gear | carb
+-------------------+------+-----+-------+-----+------+-------+-------+----+----+------+------
+ Mazda RX4         |   21 |   6 |   160 | 110 |  3.9 |  2.62 | 16.46 |  0 |  1 |    4 |    4
+ Mazda RX4 Wag     |   21 |   6 |   160 | 110 |  3.9 | 2.875 | 17.02 |  0 |  1 |    4 |    4
+ Datsun 710        | 22.8 |   4 |   108 |  93 | 3.85 |  2.32 | 18.61 |  1 |  1 |    4 |    1
+ Hornet 4 Drive    | 21.4 |   6 |   258 | 110 | 3.08 | 3.215 | 19.44 |  1 |  0 |    3 |    1
+ Hornet Sportabout | 18.7 |   8 |   360 | 175 | 3.15 |  3.44 | 17.02 |  0 |  0 |    3 |    2
+ Valiant           | 18.1 |   6 |   225 | 105 | 2.76 |  3.46 | 20.22 |  1 |  0 |    3 |    1
+ Duster 360        | 14.3 |   8 |   360 | 245 | 3.21 |  3.57 | 15.84 |  0 |  0 |    3 |    4
+ Merc 240D         | 24.4 |   4 | 146.7 |  62 | 3.69 |  3.19 |    20 |  1 |  0 |    4 |    2
+ Merc 230          | 22.8 |   4 | 140.8 |  95 | 3.92 |  3.15 |  22.9 |  1 |  0 |    4 |    2
+ Merc 280          | 19.2 |   6 | 167.6 | 123 | 3.92 |  3.44 |  18.3 |  1 |  0 |    4 |    4
+(10 rows)
+```
+
+
+### Loading SQL script
+
+
+``` SQL
+DROP TABLE mtcars_csv;
+
+CREATE TABLE  mtcars_csv (
+  model VARCHAR(20) NOT NULL PRIMARY KEY,
+  mpg FLOAT(2) NOT NULL,
+  cyc INT NOT NULL,
+  disp FLOAT(2) NOT NULL,
+  hp INT NOT NULL,
+  drat FLOAT(2) NOT NULL,
+  wt FLOAT(3) NOT NULL,
+  qsec FLOAT(2) NOT NULL,
+  vs INT NOT NULL,
+  am INT NOT NULL,
+  gear INT NOT NULL,
+  carb INT NOT NULL
+);
+
+COPY mtcars_csv (
+  model, mpg, cyc, disp, hp, drat, wt, qsec, vs, am, gear, carb
+  )
+FROM 'YOUR_PATH/csv/mtcars.csv'
+DELIMITER ','
+CSV HEADER;
+
+```
+
 
 
 
